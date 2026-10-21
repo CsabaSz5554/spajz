@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spájz</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f3;--sf:#fff;--tx:#17231e;--mu:#5d6c65;--ac:#1f6f4a;--acx:#fff;--ln:#d9e1db;--wa:#a85a00;--wab:#fdf0dc;--rd:#b42318;--rdb:#fde8e6;--ok:#1f6f4a;--okb:#e3f2e9;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101814;--sf:#18241e;--tx:#e8f0ec;--mu:#94a79e;--ac:#5ccf94;--acx:#07200f;--ln:#2b3c33;--wa:#f2b45a;--wab:#3a2c12;--rd:#ff8f84;--rdb:#3d1a17;--ok:#5ccf94;--okb:#14321f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101814;--sf:#18241e;--tx:#e8f0ec;--mu:#94a79e;--ac:#5ccf94;--acx:#07200f;--ln:#2b3c33;--wa:#f2b45a;--wab:#3a2c12;--rd:#ff8f84;--rdb:#3d1a17;--ok:#5ccf94;--okb:#14321f;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 Figtree,system-ui,sans-serif;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.w{max-width:900px;margin:0 auto;padding:14px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:1.4rem;margin:0;letter-spacing:-.01em}h1 span{display:block;font-size:.8rem;font-weight:400;color:var(--mu)}
+h2{font-size:1.05rem;margin:0 0 8px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select,button,input,textarea{font:inherit;color:var(--tx);background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:8px 10px;min-height:42px}
+button{cursor:pointer}
+button.p{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+button:disabled{opacity:.45;cursor:not-allowed}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px}
+nav button{white-space:nowrap}
+nav button.on{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+.box{background:var(--sf);border:1px solid var(--ln);border-radius:10px;padding:14px;margin-bottom:12px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--ln)}
+th{color:var(--mu);font-weight:600;font-size:.85rem}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:.82rem;font-weight:600}
+.ok{background:var(--okb);color:var(--ok)}.wa{background:var(--wab);color:var(--wa)}.rd{background:var(--rdb);color:var(--rd)}
+.ai{border-left:4px solid var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mu{color:var(--mu);font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.stats div{border:1px solid var(--ln);border-radius:8px;padding:10px}.stats b{display:block;font-size:1.4rem}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+label{display:flex;flex-direction:column;gap:3px;font-size:.85rem;color:var(--mu)}
+.note{font-size:.85rem;color:var(--mu);margin-top:8px}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.md{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:18px;max-width:420px;width:100%}
+.md p{margin:0 0 14px}.er{color:var(--rd);font-weight:600}
+.lg{max-width:420px;margin:30px auto}.lg form{grid-template-columns:1fr}
+textarea{width:100%;min-height:120px}
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px}.cd{border:1px solid var(--ln);border-radius:8px;padding:6px;font-size:.8rem;min-height:56px}.cd.hot{background:var(--wab);border-color:var(--wa)}.cd b{display:block}
+</style>
+</head>
+<body>
+<div class="w">
+<header>
+<h1>Spájz<span id="sub"></span></h1>
+<div class="ctl">
+<select id="lang" aria-label="Language"><option value="hu">Magyar</option><option value="en">English</option></select>
+<span id="who" class="mu"></span><button id="out" hidden></button>
+</div>
+</header>
+<nav id="nav"></nav>
+<main id="main"></main>
+</div>
+<script>
+const T={
+hu:{sub:"Okos készlet és beszerzés kis éttermeknek és kávézóknak",tabs:{today:"Ma",stock:"Készlet",rec:"Rögzítés",buy:"Rendelés",week:"Heti",set:"Beállítás"},
+roles:{emp:"Alkalmazott",mgr:"Üzletvezető",own:"Tulajdonos"},lg:"Bejelentkezés",usr:"Szerepkör",pw:"Jelszó",go:"Belépés",out:"Kilépés",bad:"Hibás jelszó. Próbáld újra.",
+hint:"Bemutató: a jelszó a szerepkör neve egybeírva, kisbetűvel, ékezetek nélkül.",cf:"Megerősítés",cfYes:"Igen, biztos",cfNo:"Mégsem",
+hi:"Mai teendők",nLow:"Rendelendő",nExp:"Hamar lejár",nWaste:"Pazarlás",allok:"Minden rendben, ma nincs teendő.",ai:"Javaslat",
+aiTxt:(n,d,q,u)=>`${n} várhatóan ${d} napon belül elfogy. A következő szállításig kb. ${q} ${u} kell. Megnyissam a rendelést?`,yes:"Igen",no:"Nem",
+cfAi:"Biztosan megnyitod a rendelési listát?",cfAiNo:"Biztosan elveted a javaslatot?",
+prod:"Termék",stock:"Készlet",min:"Min.",sup:"Beszállító",price:"Ár",exp:"Lejárat",status:"Állapot",local:"helyi",search:"Keresés",days:"nap",
+st:{ok:"Rendben",low:"Rendelni kell",exp:"Hamar lejár"},
+recT:"Mozgás rögzítése",type:"Típus",mv:{use:"Felhasználás",in:"Beérkezés",waste:"Selejt",count:"Leltár (új készlet)"},qty:"Mennyiség",save:"Rögzítés",
+cfSave:(n,t,q,u)=>`Biztosan rögzíted? ${n}: ${t}, ${q} ${u}. Ellenőrizd az adatot.`,recent:"Legutóbbi mozgások",who:"Rögzítette",stt:{rec:"Rögzítve",chk:"Ellenőrizve"},check:"Ellenőrzés",cfChk:"Biztosan ellenőrizettnek jelölöd?",
+buyT:"Rendelési lista beszállítónként",need:"Mennyiség",total:"Összesen",approve:"Jóváhagyás és üzenet",sent:"Elküldve",cfAp:s=>`Biztosan jóváhagyod a ${s} rendelését?`,
+noAppr:"Jóváhagyáshoz vezetői jogosultság kell.",none:"Nincs rendelendő termék.",copy:"Másolás",mail:"E-mail megnyitása",copied:"Másolva",
+msgHi:"Szia! Rendelést szeretnénk leadni:",msgBye:"Köszönjük!",subj:"Rendelés",
+wk:"Heti összefoglaló",wWaste:"Selejt költsége",wSent:"Elküldött rendelés",wPrice:"Árváltozások",noFin:"Ez a nézet pénzügyi adatot tartalmaz, vezetői jogosultság kell.",csv:"Export (CSV, könyvelőnek)",
+set:"Beállítások",cur:"Pénznem",add:"Új termék",name:"Név",unit:"Mértékegység",daily:"Napi fogyás",lead:"Szállítási idő (nap)",loc:"Helyi termelő",addB:"Hozzáadás",
+cfAdd:n=>`Biztosan felveszed: ${n}?`,reset:"Demo adatok visszaállítása",cfReset:"Biztosan törlöd az összes adatot és visszaállítod a demót?",noSet:"A beállításokhoz vezetői jogosultság kell.",
+demo:"Bemutató. Az adatok csak ezen az eszközön, a böngészőben tárolódnak.",pcs:"db",now:"Most",ordBy:"Rendelj legkésőbb",rate:"Fogyás/nap",cal:"Rendelési naptár (14 nap)",calNote:"A napi fogyást a becslésből és a rögzített felhasználásból számolja. Ha gyorsabban fogy, hamarabb jelez, ha lassabban, később.",editRate:"Napi fogyás becslése",rateNote:"Ez a kiinduló érték. Pár nap rögzített felhasználás után az alkalmazás a valós fogyáshoz igazítja. ▲ = gyorsabb, ▼ = lassabb a becslésnél.",cfRate:(n,v,u)=>`Biztosan átállítod? ${n}: ${v} ${u}/nap.`,saved:"Mentve"},
+en:{sub:"Smart stock and purchasing for small restaurants and cafes",tabs:{today:"Today",stock:"Stock",rec:"Record",buy:"Orders",week:"Weekly",set:"Settings"},
+roles:{emp:"Employee",mgr:"Manager",own:"Owner"},lg:"Log in",usr:"Role",pw:"Password",go:"Sign in",out:"Log out",bad:"Wrong password. Try again.",
+hint:"Demo: the password is the role name in lowercase, no spaces or accents.",cf:"Confirmation",cfYes:"Yes, I’m sure",cfNo:"Cancel",
+hi:"Today’s tasks",nLow:"To order",nExp:"Expiring soon",nWaste:"Waste",allok:"All good, nothing to do today.",ai:"Suggestion",
+aiTxt:(n,d,q,u)=>`${n} will probably run out within ${d} days. You will need about ${q} ${u} until the next delivery. Open the order?`,yes:"Yes",no:"No",
+cfAi:"Are you sure you want to open the order list?",cfAiNo:"Are you sure you want to dismiss this suggestion?",
+prod:"Product",stock:"Stock",min:"Min.",sup:"Supplier",price:"Price",exp:"Expiry",status:"Status",local:"local",search:"Search",days:"days",
+st:{ok:"OK",low:"Order now",exp:"Expiring"},
+recT:"Record movement",type:"Type",mv:{use:"Usage",in:"Delivery",waste:"Waste",count:"Count (new stock)"},qty:"Quantity",save:"Save",
+cfSave:(n,t,q,u)=>`Are you sure you want to save this? ${n}: ${t}, ${q} ${u}. Please check the data.`,recent:"Recent movements",who:"Recorded by",stt:{rec:"Recorded",chk:"Checked"},check:"Check",cfChk:"Are you sure you want to mark this as checked?",
+buyT:"Order list by supplier",need:"Quantity",total:"Total",approve:"Approve and draft message",sent:"Sent",cfAp:s=>`Are you sure you want to approve the order to ${s}?`,
+noAppr:"Approving needs manager rights.",none:"Nothing to order.",copy:"Copy",mail:"Open email",copied:"Copied",
+msgHi:"Hello! We would like to place an order:",msgBye:"Thank you!",subj:"Order",
+wk:"Weekly summary",wWaste:"Cost of waste",wSent:"Orders sent",wPrice:"Price changes",noFin:"This view contains financial data and needs manager rights.",csv:"Export (CSV, for the accountant)",
+set:"Settings",cur:"Currency",add:"New product",name:"Name",unit:"Unit",daily:"Daily use",lead:"Delivery time (days)",loc:"Local producer",addB:"Add",
+cfAdd:n=>`Are you sure you want to add ${n}?`,reset:"Reset demo data",cfReset:"Are you sure you want to delete all data and restore the demo?",noSet:"Settings need manager rights.",
+demo:"Demo. Data is stored only on this device, in the browser.",pcs:"pcs",now:"Now",ordBy:"Order by",rate:"Use/day",cal:"Order calendar (14 days)",calNote:"Daily use is calculated from your estimate and the recorded usage. If stock goes faster it warns earlier, if slower later.",editRate:"Daily use estimate",rateNote:"This is the starting value. After a few days of recorded usage the app adjusts to the real rate. ▲ = faster, ▼ = slower than estimated.",cfRate:(n,v,u)=>`Are you sure you want to change this? ${n}: ${v} ${u}/day.`,saved:"Saved"}};
+const DAY=864e5;
+function seed(o){const now=Date.now();o.P.forEach(p=>{p.since=now-14*DAY;for(let i=14;i>=1;i--){let f=1+0.15*Math.sin(i*2+p.id);if(p.id===3&&i<=4)f*=1.6;o.LOG.push({id:now-i*DAY+p.id,pid:p.id,t:"use",q:Math.round(p.d*f*10)/10,by:"emp",st:"chk",ts:now-i*DAY})}});o.LOG.push({id:1,pid:5,t:"waste",q:3,by:"emp",st:"rec",ts:now-DAY});return o}
+const DEF=()=>seed({P:[
+{id:1,n:{hu:"Tej",en:"Milk"},u:"L",q:8,m:10,s:"Mizo Tej Kft.",loc:1,p:420,pp:400,e:6,d:3,lead:2},
+{id:2,n:{hu:"Kávébab",en:"Coffee beans"},u:"kg",q:12,m:5,s:"Pannon Pörkölő",loc:1,p:6800,pp:6600,e:120,d:0.8,lead:3},
+{id:3,n:{hu:"Zabtej",en:"Oat milk"},u:"L",q:3,m:6,s:"Mizo Tej Kft.",loc:1,p:690,pp:640,e:40,d:1.5,lead:2},
+{id:4,n:{hu:"Elviteles pohár",en:"Takeaway cups"},u:"pcs",q:600,m:200,s:"EcoPack Bt.",loc:0,p:38,pp:38,e:999,d:60,lead:4},
+{id:5,n:{hu:"Szendvicsalap",en:"Sandwich base"},u:"pcs",q:30,m:15,s:"Helyi Pékség",loc:1,p:210,pp:210,e:1,d:12,lead:1},
+{id:6,n:{hu:"Citrom",en:"Lemons"},u:"kg",q:2,m:3,s:"Zöldséges Kft.",loc:1,p:900,pp:850,e:3,d:0.5,lead:1}],
+LOG:[{id:2,pid:2,t:"in",q:5,by:"emp",st:"rec",ts:Date.now()-DAY}],SENT:[],DIS:[],cur:"HUF"});
+let D=DEF();try{const s=JSON.parse(localStorage.getItem("spajz2"));if(s&&s.P)D=s}catch(e){}
+const save=()=>{try{localStorage.setItem("spajz2",JSON.stringify(D))}catch(e){}};
+let S={lang:"hu",role:"mgr",auth:false,tab:"today",q:""},PEND=null,LERR=false;
+const t=()=>T[S.lang],mgr=()=>S.role!=="emp";
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z]/g,"");
+const un=u=>u==="pcs"?t().pcs:u;
+const money=x=>D.cur==="EUR"?(x/400).toFixed(2)+" €":Math.round(x).toLocaleString(S.lang==="hu"?"hu-HU":"en-GB")+" Ft";
+function rate(p){const now=Date.now(),l=D.LOG.filter(x=>x.pid===p.id&&(x.t==="use"||x.t==="waste")&&x.ts>now-14*DAY);
+ const days=new Set(l.map(x=>new Date(x.ts).toDateString())).size;if(days<3)return{r:p.d,w:0,m:null};
+ const first=Math.min(...l.map(x=>x.ts)),win=Math.max(1,(now-first)/DAY),m=l.reduce((a,x)=>a+x.q,0)/win,w=Math.min(1,days/10);
+ return{r:p.d*(1-w)+m*w,w,m}}
+const eff=p=>Math.max(0.01,rate(p).r);
+const need=p=>Math.max(0,Math.ceil(eff(p)*(p.lead+7)-p.q));
+const left=p=>p.q/eff(p);
+const orderIn=p=>left(p)-p.lead-1;
+const low=p=>p.q<p.m||orderIn(p)<=0;
+const dlabel=p=>{const n=orderIn(p);if(p.q<p.m||n<=0)return`<b>${t().now}</b>`;return new Date(Date.now()+n*DAY).toLocaleDateString(S.lang==="hu"?"hu-HU":"en-GB",{weekday:"short",month:"short",day:"numeric"})};
+const rateCell=p=>{const r=rate(p),e=eff(p),ar=r.m===null?"":e>p.d*1.15?` <span class="tag rd">▲</span>`:e<p.d*0.85?` <span class="tag ok">▼</span>`:"";return e.toFixed(1)+" "+un(p.u)+ar};
+function calBox(){const x=t(),loc=S.lang==="hu"?"hu-HU":"en-GB",cells=[];
+ for(let i=0;i<14;i++){const dt=new Date(Date.now()+i*DAY),n=D.P.filter(p=>p.q<p.m?i===0:Math.floor(Math.max(0,orderIn(p)))===i).map(p=>p.n[S.lang]);
+  cells.push(`<div class="cd${n.length?" hot":""}"><b>${dt.toLocaleDateString(loc,{month:"numeric",day:"numeric"})}</b>${n.map(a=>`<div>${a}</div>`).join("")}</div>`)}
+ return`<div class="box"><h2>${x.cal}</h2><div class="cal">${cells.join("")}</div><div class="note">${x.calNote}</div></div>`}
+const stt=p=>low(p)?["low","rd"]:p.e<=2?["exp","wa"]:["ok","ok"];
+const tag=p=>{const[k,c]=stt(p);return`<span class="tag ${c}">${t().st[k]}</span>`};
+const oq=p=>Math.max(need(p),p.m-p.q+1);
+const wasteCost=()=>D.LOG.filter(l=>l.t==="waste").reduce((a,l)=>{const p=D.P.find(x=>x.id===l.pid);return a+(p?l.q*p.p:0)},0);
+function ask(msg,fn){PEND={msg,fn};render()}
+function groups(){const g={};D.P.filter(low).forEach(p=>(g[p.s]=g[p.s]||[]).push(p));return g}
+function msgFor(s,items){const x=t();return x.msgHi+"\n"+items.map(p=>`- ${p.n[S.lang]}: ${oq(p)} ${un(p.u)}`).join("\n")+"\n"+x.msgBye}
+function stockRows(){const q=S.q.toLowerCase();return D.P.filter(p=>p.n.hu.toLowerCase().includes(q)||p.n.en.toLowerCase().includes(q)).map(p=>`<tr><td>${p.n[S.lang]}${p.loc?` <span class="mu">· ${t().local}</span>`:""}</td><td>${p.q} ${un(p.u)}</td><td>${p.m}</td><td>${p.s}</td><td>${mgr()?money(p.p)+(p.p>p.pp?` <span class="rd tag">▲${Math.round((p.p/p.pp-1)*100)}%</span>`:""):"–"}</td><td>${p.e>=999?"–":p.e+" "+t().days}</td><td>${rateCell(p)}</td><td>${dlabel(p)}</td><td>${tag(p)}</td></tr>`).join("")}
+const V={
+today(){const x=t(),lw=D.P.filter(low),ex=D.P.filter(p=>p.e<=2&&!low(p)),a=lw.filter(p=>!D.DIS.includes(p.id)).sort((a,b)=>left(a)-left(b))[0];
+ const ai=a?`<div class="box ai"><h2>${x.ai}</h2><p>${x.aiTxt(a.n[S.lang],Math.max(1,Math.ceil(left(a))),oq(a),un(a.u))}</p><div class="row"><button class="p" data-ai="y${a.id}">${x.yes}</button><button data-ai="n${a.id}">${x.no}</button></div></div>`:"";
+ const rows=lw.concat(ex).map(p=>`<tr><td>${p.n[S.lang]}</td><td>${p.q} ${un(p.u)}</td><td>${tag(p)}</td></tr>`).join("");
+ return`${ai}<div class="box"><h2>${x.hi}</h2><div class="stats"><div><b>${lw.length}</b>${x.nLow}</div><div><b>${ex.length+lw.filter(p=>p.e<=2).length}</b>${x.nExp}</div><div><b>${mgr()?money(wasteCost()):D.LOG.filter(l=>l.t==="waste").length}</b>${x.nWaste}</div></div>
+ ${rows?`<div class="tbl"><table><tr><th>${x.prod}</th><th>${x.stock}</th><th>${x.status}</th></tr>${rows}</table></div>`:`<p>${x.allok}</p>`}</div>`},
+stock(){const x=t();return`<div class="box"><input id="sq" placeholder="${x.search}" value="${S.q}" style="width:100%;margin-bottom:8px"><div class="tbl"><table><tr><th>${x.prod}</th><th>${x.stock}</th><th>${x.min}</th><th>${x.sup}</th><th>${x.price}</th><th>${x.exp}</th><th>${x.rate}</th><th>${x.ordBy}</th><th>${x.status}</th></tr><tbody id="tb">${stockRows()}</tbody></table></div></div>`},
+rec(){const x=t();
+ const rows=D.LOG.slice(-10).reverse().map(l=>{const p=D.P.find(a=>a.id===l.pid);return p?`<tr><td>${p.n[S.lang]}</td><td>${x.mv[l.t]}</td><td>${l.q} ${un(p.u)}</td><td>${x.roles[l.by]}</td><td><span class="tag ${l.st==="chk"?"ok":"wa"}">${x.stt[l.st]}</span></td><td>${l.st==="rec"&&mgr()?`<button data-chk="${l.id}">${x.check}</button>`:""}</td></tr>`:""}).join("");
+ return`<div class="box"><h2>${x.recT}</h2><form id="rf"><label>${x.prod}<select name="pid">${D.P.map(p=>`<option value="${p.id}">${p.n[S.lang]}</option>`).join("")}</select></label><label>${x.type}<select name="t">${Object.entries(x.mv).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label><label>${x.qty}<input name="q" type="number" min="0" step="any" required></label><label>&nbsp;<button class="p" type="submit">${x.save}</button></label></form></div>
+ <div class="box"><h2>${x.recent}</h2><div class="tbl"><table><tr><th>${x.prod}</th><th>${x.type}</th><th>${x.qty}</th><th>${x.who}</th><th>${x.status}</th><th></th></tr>${rows}</table></div></div>`},
+buy(){const x=t(),g=groups(),ks=Object.keys(g),cal=calBox();
+ if(!ks.length)return cal+`<div class="box"><p>${x.none}</p></div>`;
+ return cal+`<div class="box"><h2>${x.buyT}</h2></div>`+ks.map((s,i)=>{const it=g[s],tot=it.reduce((a,p)=>a+oq(p)*p.p,0),sent=D.SENT.includes(s),m=msgFor(s,it);
+  return`<div class="box"><h2>${s}</h2><div class="tbl"><table>${it.map(p=>`<tr><td>${p.n[S.lang]}</td><td>${oq(p)} ${un(p.u)}</td><td>${mgr()?money(oq(p)*p.p):""}</td></tr>`).join("")}</table></div>${mgr()?`<p><b>${x.total}: ${money(tot)}</b></p>`:""}
+  ${sent?`<span class="tag ok">${x.sent}</span><textarea id="m${i}" readonly>${m}</textarea><div class="row"><button data-cp="m${i}">${x.copy}</button><a href="mailto:?subject=${encodeURIComponent(x.subj)}&body=${encodeURIComponent(m)}"><button>${x.mail}</button></a></div>`:`<button class="p" data-ap="${s}" ${mgr()?"":"disabled"}>${x.approve}</button>${mgr()?"":`<div class="note">${x.noAppr}</div>`}`}</div>`}).join("")},
+week(){const x=t();if(!mgr())return`<div class="box"><h2>${x.wk}</h2><p>${x.noFin}</p></div>`;
+ const pc=D.P.filter(p=>p.p>p.pp).map(p=>`${p.n[S.lang]} +${Math.round((p.p/p.pp-1)*100)}%`).join(", ")||"–";
+ const csv="name,unit,stock,min,supplier,price_huf\n"+D.P.map(p=>[p.n[S.lang],p.u,p.q,p.m,p.s,p.p].join(",")).join("\n");
+ return`<div class="box"><h2>${x.wk}</h2><div class="tbl"><table><tr><th>${x.wWaste}</th><td>${money(wasteCost())}</td></tr><tr><th>${x.wSent}</th><td>${D.SENT.length}</td></tr><tr><th>${x.wPrice}</th><td>${pc}</td></tr></table></div></div>
+ <div class="box"><h2>${x.csv}</h2><textarea id="cs" readonly>${csv}</textarea><button data-cp="cs">${x.copy}</button></div>`},
+set(){const x=t();if(!mgr())return`<div class="box"><p>${x.noSet}</p></div>`;
+ return`<div class="box"><h2>${x.cur}</h2><select id="cur"><option value="HUF" ${D.cur==="HUF"?"selected":""}>HUF (Ft)</option><option value="EUR" ${D.cur==="EUR"?"selected":""}>EUR (€)</option></select></div>
+ <div class="box"><h2>${x.editRate}</h2><form id="ef"><label>${x.prod}<select name="pid">${D.P.map(p=>`<option value="${p.id}">${p.n[S.lang]}</option>`).join("")}</select></label><label>${x.daily}<input name="d" type="number" step="any" min="0.01" required></label><label>&nbsp;<button class="p" type="submit">${x.save}</button></label></form><div class="note">${x.rateNote}</div></div>
+ <div class="box"><h2>${x.add}</h2><form id="af"><label>${x.name}<input name="n" required></label><label>${x.unit}<select name="u"><option>L</option><option>kg</option><option value="pcs">${x.pcs}</option></select></label><label>${x.stock}<input name="q" type="number" step="any" required></label><label>${x.min}<input name="m" type="number" step="any" required></label><label>${x.sup}<input name="s" required></label><label>${x.price} (${D.cur})<input name="p" type="number" step="any" required></label><label>${x.daily}<input name="d" type="number" step="any" value="1" required></label><label>${x.lead}<input name="lead" type="number" value="2" required></label><label>${x.loc}<select name="loc"><option value="0">–</option><option value="1">✔</option></select></label><label>&nbsp;<button class="p" type="submit">${x.addB}</button></label></form></div>
+ ${S.role==="own"?`<button data-reset="1">${x.reset}</button>`:""}`}};
+function login(){const x=t();return`<div class="box lg"><h2>${x.lg}</h2><form id="lf"><label>${x.usr}<select name="r">${Object.entries(x.roles).map(([k,v])=>`<option value="${k}" ${k===S.role?"selected":""}>${v}</option>`).join("")}</select></label><label>${x.pw}<input name="pw" type="password" autocomplete="off" required></label>${LERR?`<div class="er">${x.bad}</div>`:""}<button class="p" type="submit">${x.go}</button></form><div class="note">${x.hint}</div></div>`}
+function modal(){const x=t();return PEND?`<div class="mo" role="dialog" aria-modal="true"><div class="md"><h2>${x.cf}</h2><p>${PEND.msg}</p><div class="row"><button class="p" data-cf="y">${x.cfYes}</button><button data-cf="n" autofocus>${x.cfNo}</button></div></div></div>`:""}
+function render(){const x=t(),FL=S.flash||"";S.flash="";document.documentElement.lang=S.lang;
+ document.getElementById("sub").textContent=x.sub;
+ document.getElementById("who").textContent=S.auth?x.roles[S.role]:"";
+ const o=document.getElementById("out");o.textContent=x.out;o.hidden=!S.auth;
+ document.getElementById("nav").innerHTML=!S.auth?"":Object.entries(x.tabs).map(([k,v])=>`<button class="${k===S.tab?"on":""}" data-tab="${k}">${v}</button>`).join("");
+ document.getElementById("main").innerHTML=(S.auth&&FL?`<div class="box ai">✔ ${FL}</div>`:"")+(S.auth?V[S.tab]():login())+`<div class="note">${x.demo}</div>`+modal()}
+function doSave(f){const p=D.P.find(a=>a.id===+f.get("pid")),q=+f.get("q"),k=f.get("t");
+ D.LOG.push({id:Date.now(),pid:p.id,t:k,q,by:S.role,st:mgr()?"chk":"rec",ts:Date.now()});
+ if(k==="in")p.q+=q;else if(k==="count")p.q=q;else p.q=Math.max(0,p.q-q);save();render()}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const x=t(),d=b.dataset;
+ if(d.cf){const f=PEND&&PEND.fn;PEND=null;if(d.cf==="y"&&f){f();save()}render();return}
+ if(d.tab){S.tab=d.tab}
+ else if(d.ai){const id=+d.ai.slice(1),y=d.ai[0]==="y";ask(y?x.cfAi:x.cfAiNo,()=>{if(y)S.tab="buy";else D.DIS.push(id)});return}
+ else if(d.chk){const id=+d.chk;ask(x.cfChk,()=>{const l=D.LOG.find(a=>a.id===id);if(l)l.st="chk"});return}
+ else if(d.ap){const s=d.ap;ask(x.cfAp(s),()=>{D.SENT.push(s)});return}
+ else if(d.reset){ask(x.cfReset,()=>{D=DEF()});return}
+ else if(d.cp){const el=document.getElementById(d.cp);el.select();try{navigator.clipboard.writeText(el.value)}catch(er){try{document.execCommand("copy")}catch(e2){}}b.textContent=x.copied;return}
+ else if(b.id==="out"){S.auth=false;S.tab="today";PEND=null}
+ else return;render()});
+document.addEventListener("submit",e=>{e.preventDefault();const x=t(),f=new FormData(e.target),id=e.target.id;
+ if(id==="lf"){const r=f.get("r"),pw=String(f.get("pw")).trim();S.role=r;if(pw===norm(T.hu.roles[r])||pw===norm(T.en.roles[r])){S.auth=true;S.tab="today";LERR=false}else LERR=true;render();return}
+ if(id==="rf"){const p=D.P.find(a=>a.id===+f.get("pid"));ask(x.cfSave(p.n[S.lang],x.mv[f.get("t")],f.get("q"),un(p.u)),()=>doSave(f));return}
+ if(id==="ef"){const p=D.P.find(a=>a.id===+f.get("pid")),v=Math.max(0.01,+f.get("d"));ask(x.cfRate(p.n[S.lang],v,un(p.u)),()=>{p.d=v;S.flash=x.saved});return}
+ if(id==="af"){const n=f.get("n"),k=D.cur==="EUR"?400:1;ask(x.cfAdd(n),()=>{D.P.push({id:Date.now(),n:{hu:n,en:n},u:f.get("u"),q:+f.get("q"),m:+f.get("m"),s:f.get("s"),loc:+f.get("loc"),p:+f.get("p")*k,pp:+f.get("p")*k,e:999,d:Math.max(0.01,+f.get("d")),lead:+f.get("lead"),since:Date.now()});S.tab="stock";S.q="";S.flash=(S.lang==="hu"?"Hozzáadva: ":"Added: ")+n})}});
+document.addEventListener("input",e=>{if(e.target.id==="sq"){S.q=e.target.value;document.getElementById("tb").innerHTML=stockRows()}});
+document.addEventListener("change",e=>{if(e.target.id==="cur"){D.cur=e.target.value;save();render()}});
+document.getElementById("lang").addEventListener("change",e=>{S.lang=e.target.value;render()});
+render();
+</script>
+</body>
+</html>
